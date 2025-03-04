@@ -11,12 +11,15 @@ import {
   Sunrise,
   Sunset,
   Thermometer,
+  MapPin,
+  ArrowLeftToLine
 } from "lucide-react";
 import WeatherIcon from "./components/weather-icon";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { useRouter } from "next/router";
 
-const initialWeather = {
+export const initialWeather = {
   name: "Loading",
   sys: { country: "", sunrise: 0, sunset: 0 },
   weather: [{ main: "Clear", description: "clear sky" }],
@@ -26,6 +29,7 @@ const initialWeather = {
   clouds: { all: 0 },
 };
 
+
 export default function WeatherComponent() {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null,
@@ -34,6 +38,15 @@ export default function WeatherComponent() {
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setError] = useState("");
+  const router = useRouter();
+
+  const saveHistory = (newDate : any) => {
+    const saved = JSON.parse(localStorage.getItem("weatherHistory") || "[]")
+
+    const updated = [newDate, ...saved].slice(0, 5)
+    localStorage.clear();
+    localStorage.setItem("weatherHistory", JSON.stringify(updated))
+  }
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -53,31 +66,37 @@ export default function WeatherComponent() {
     }
   }, []);
 
-    const { data, isLoading, error } = !city ? api.weather.get.useQuery(
-    {
-      lat: location?.lat ?? 0,
-      lon: location?.lon ?? 0,
-    },
-    { enabled: location !== null },
-  ) : api.weather.getFromCity.useQuery({city});
-
- 
+  const { data, isLoading, error } = !city
+    ? api.weather.get.useQuery(
+        {
+          lat: location?.lat ?? 0,
+          lon: location?.lon ?? 0,
+        },
+        { enabled: location !== null },
+      )
+    : api.weather.getFromCity.useQuery({ city });
 
   useEffect(() => {
     if (data) {
       setWeather(data);
+      saveHistory(data);
     }
   }, [data]);
 
-
-  const handleSubmit = (e : React.FormEvent) => {
-    e.preventDefault()  
-    if(city){
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (city) {
       setCity(city);
     }
-  }
-  
-  
+  };
+
+  const handleClearCity = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCity("");
+    console.log(city);
+  };
+
+
   const isDay = () => {
     const currentTime = Math.floor(Date.now() / 1000);
     return (
@@ -137,19 +156,37 @@ export default function WeatherComponent() {
     <div
       className={`flex min-h-screen flex-col items-center p-4 transition-all duration-1000 ${getBackgroundClasses()}`}
     >
+      <div className={`absolute top-5 left-5 ${getTextColorClass()}`}>
+        <button onClick={() => router.push("/")}>
+          <ArrowLeftToLine className="w-10 h-10" />
+        </button>
+      </div>
       <div className="w-full max-w-md">
-        <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
-          <Input 
-          type="text"
-          placeholder="Enter city name"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="bg-white/20 backdrop-blur-md border-none text-inherit placeholder:text-inherit/70"
-          />
-          <Button type="submit" variant="outline" className="bg-white/20 backdrop-blur-md border-none">
-          <Search className="h-4 w-4"/>
+        <div className="grid-cols-3 justify-start">
+          <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
+            <Input
+              type="text"
+              placeholder="Enter city name"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="placeholder:text-inherit/70 border-none bg-white/20 text-inherit backdrop-blur-md"
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              className="border-none bg-white/20 backdrop-blur-md"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </form>
+          <Button
+            onSubmit={handleClearCity}
+            variant="outline"
+            className="border-none bg-white/20 backdrop-blur-md"
+          >
+            <MapPin className="h-4 w-4" />
           </Button>
-        </form>
+        </div>
         <div className={`transition-all duration-1000 ${getTextColorClass()}`}>
           {loading ? (
             <WeatherSkeleton />

@@ -7,6 +7,12 @@ dotenv.config();
 
 const API_KEY = process.env.DATABASE_URL;
 
+let lastCity = '';
+let lastPosition = {lat: null, lon : null};
+let lastData = null;
+let lastDataFetchTime = 0;
+const CACHE_EXPIRATION_TIME = 600000;
+
 export const weatherRouter = createTRPCRouter({
     get: publicProcedure.input(
         z.object({
@@ -21,6 +27,12 @@ export const weatherRouter = createTRPCRouter({
         if (!API_KEY) {
             throw new Error("Missing API KEY");
         }
+
+        if( lat === lastPosition.lat  && lon === lastPosition.lon && Date.now() - lastDataFetchTime < CACHE_EXPIRATION_TIME) {
+            console.log('Returning cached weather data for position:', lat, lon)
+            return lastData;
+        }
+
         //`api.openweathermap.org/data/2.5/weather?q=${place},${country}&APPID=80c577fab17d161a9756c2460e6a08fa`
 
         //https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${API_KEY}
@@ -47,6 +59,11 @@ export const weatherRouter = createTRPCRouter({
             const {city } = input
             if (!API_KEY) {
                 throw new Error("Missing API KEY");
+            }
+
+            if(city === lastCity && Date.now() - lastDataFetchTime < CACHE_EXPIRATION_TIME){
+                console.log('Returning cached weather data for city:', city)
+                return lastData;
             }
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=80c577fab17d161a9756c2460e6a08fa`
 

@@ -4,10 +4,7 @@ import dotenv from "dotenv";
 import type WeatherData from "~/types/weatherType";
 dotenv.config();
 
-
-const API_KEY = process.env.DATABASE_URL;
-
-
+const API_KEY = process.env.API_KEY;
 
 let lastCity = '';
 let lastPosition = {lat: 0, lon : 0};
@@ -35,10 +32,8 @@ export const weatherRouter = createTRPCRouter({
             return lastData;
         }
 
-        //`api.openweathermap.org/data/2.5/weather?q=${place},${country}&APPID=80c577fab17d161a9756c2460e6a08fa`
 
-        //https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${API_KEY}
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=80c577fab17d161a9756c2460e6a08fa`;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}`;
 
           try{
             const response = await fetch(url);
@@ -65,6 +60,7 @@ export const weatherRouter = createTRPCRouter({
     ).query(
         async ({input}) =>{
             const {city } = input
+            
             if (!API_KEY) {
                 throw new Error("Missing API KEY");
             }
@@ -73,7 +69,7 @@ export const weatherRouter = createTRPCRouter({
                 console.log('Returning cached weather data for city:', city)
                 return lastData;
             }
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=80c577fab17d161a9756c2460e6a08fa`
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${API_KEY}`
 
             try{
                 const res = await fetch(url)

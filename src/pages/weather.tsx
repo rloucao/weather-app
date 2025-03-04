@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { set } from "zod";
 import { api } from "~/utils/api";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -18,8 +17,9 @@ import WeatherIcon from "./components/weather-icon";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { useRouter } from "next/router";
+import type WeatherData from "~/types/weatherType";
 
-export const initialWeather = {
+export const initialWeather : WeatherData = {
   name: "Loading",
   sys: { country: "", sunrise: 0, sunset: 0 },
   weather: [{ main: "Clear", description: "clear sky" }],
@@ -36,12 +36,11 @@ export default function WeatherComponent() {
   );
   const [weather, setWeather] = useState(initialWeather);
   const [city, setCity] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [err, setError] = useState("");
+  const loading = false;
   const router = useRouter();
 
-  const saveHistory = (newDate : any) => {
-    const saved = JSON.parse(localStorage.getItem("weatherHistory") || "[]")
+  const saveHistory = (newDate : WeatherData) => {
+    const saved = JSON.parse(localStorage.getItem("weatherHistory") ?? "[]") as WeatherData[]
 
     const updated = [newDate, ...saved].slice(0, 5)
     localStorage.clear();
@@ -66,15 +65,15 @@ export default function WeatherComponent() {
     }
   }, []);
 
-  const { data, isLoading, error } = !city
-    ? api.weather.get.useQuery(
-        {
-          lat: location?.lat ?? 0,
-          lon: location?.lon ?? 0,
-        },
-        { enabled: location !== null },
-      )
-    : api.weather.getFromCity.useQuery({ city });
+  const { data } = !city
+  ? api.weather.get.useQuery(
+      {
+        lat: location?.lat ?? 0,
+        lon: location?.lon ?? 0,
+      },
+      { enabled: location !== null },
+    )
+  : api.weather.getFromCity.useQuery({ city }) as { data: WeatherData }; 
 
   useEffect(() => {
     if (data) {
@@ -202,7 +201,7 @@ export default function WeatherComponent() {
                 </div>
                 <div className="text-center">
                   <WeatherIcon
-                    weatherMain={weather.weather[0]?.main || "Clear"}
+                    weatherMain={weather.weather[0]?.main ?? "Clear"}
                     isDay={isDay()}
                     className="h-20 w-20"
                   />

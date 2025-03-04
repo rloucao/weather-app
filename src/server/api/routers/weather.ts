@@ -1,15 +1,17 @@
 import {z} from "zod";
-
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import dotenv from "dotenv";
+import type WeatherData from "~/types/weatherType";
 dotenv.config();
 
 
 const API_KEY = process.env.DATABASE_URL;
 
+
+
 let lastCity = '';
-let lastPosition = {lat: null, lon : null};
-let lastData = null;
+let lastPosition = {lat: 0, lon : 0};
+let lastData : WeatherData | null = null;
 let lastDataFetchTime = 0;
 const CACHE_EXPIRATION_TIME = 600000;
 
@@ -43,7 +45,13 @@ export const weatherRouter = createTRPCRouter({
             if (!response.ok){
                 throw new Error(`Failed fetching the data: ${response.statusText}`)
             }
-            const data = await response.json()
+            const data : WeatherData = await response.json() as WeatherData;
+            lastPosition = { 
+                lat: data.coord.lat, 
+                lon: data.coord.lon 
+              };
+            lastData = data
+            lastDataFetchTime = Date.now()
             return data;
           }catch(error) {
             console.log("Error API:", error)
@@ -72,7 +80,10 @@ export const weatherRouter = createTRPCRouter({
                 if(!res.ok){
                     throw new Error(`Failed fetching data ${res.statusText}`)
                 }
-                const data = res.json()
+                const data : WeatherData = await res.json() as WeatherData;
+                lastCity = data.name;
+                lastData = data;
+                lastDataFetchTime = Date.now()
                 return data;
             }catch(error){
                 console.log("Error API:", error)

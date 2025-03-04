@@ -1,32 +1,30 @@
-import Head from "next/head";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
-import { initialWeather } from "./weather";
-import { api } from "~/utils/api";
-import Weather from "./weather";
 import { useRouter } from "next/router";
 import { Droplets, MapPin, Thermometer, Map } from "lucide-react";
+import type WeatherData from "~/types/weatherType";
+
 
 export default function Home() {
   const rout = useRouter();
-  const [cache, setCache] = useState<any[]>([]);
+  const [cache, setCache] = useState<WeatherData[]>([]);
 
   //localStorage.clear();
 
   useEffect(() => {
-    const savedHistory = JSON.parse(
-      localStorage.getItem("weatherHistory") || "[]",
-    );
+    const savedHistory : WeatherData []= JSON.parse(
+      localStorage.getItem("weatherHistory") ?? "[]",
+    ) as WeatherData[]
     if (savedHistory.length > 3) {
-      const newHistory = savedHistory.slice(-3); 
-      setCache(newHistory);
+      setCache(savedHistory.slice(-3));
     }
-
     else{
       setCache(savedHistory);
     }
 
-  });
+  }, []);
+
+  const placeholderItems = Array(5).fill(undefined)
 
   return (
     <div className="bg-rgb(30, 58, 138) flex min-h-screen items-center justify-center gap-5 bg-[#203989]">
@@ -43,7 +41,7 @@ export default function Home() {
         <ul className="flex gap-6 flex-col items-center">
           {cache.length > 0
             ? cache.map((current, _) => (
-                <li key={current.id}>
+                <li key={current.name}>
                   <Card className="border-none bg-white/10 backdrop-blur-md">
                     <CardContent className="p-4">
                       <div className="flex justify-items-start gap-2">
@@ -85,25 +83,25 @@ export default function Home() {
                   </Card>
                 </li>
               ))
-            : [...Array(5)].map((_, index) => (
-                <li key={index} className="w-[400%]">
-                  <div className="w-full max-w-lg rounded-md border border-black p-4">
-                    <div className="flex animate-pulse space-x-4">
-                      <div className="size-10 rounded-full bg-blue-950"></div>
-                      <div className="flex-1 space-y-6 py-1">
-                        <div className="h-2 rounded bg-blue-950"></div>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-3 gap-4">
-                            <div className="col-span-2 h-2 rounded bg-blue-950"></div>
-                            <div className="col-span-1 h-2 rounded bg-blue-950"></div>
-                          </div>
-                          <div className="h-2 rounded bg-blue-950"></div>
+            : placeholderItems.map((_, index) => (
+              <li key={index} className="w-[400%]">
+                <div className="w-full max-w-lg rounded-md border border-black p-4">
+                  <div className="flex animate-pulse space-x-4">
+                    <div className="size-10 rounded-full bg-blue-950"></div>
+                    <div className="flex-1 space-y-6 py-1">
+                      <div className="h-2 rounded bg-blue-950"></div>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="col-span-2 h-2 rounded bg-blue-950"></div>
+                          <div className="col-span-1 h-2 rounded bg-blue-950"></div>
                         </div>
+                        <div className="h-2 rounded bg-blue-950"></div>
                       </div>
                     </div>
                   </div>
-                </li>
-              ))}
+                </div>
+              </li>
+            ))}
         </ul>
       </div>
     </div>

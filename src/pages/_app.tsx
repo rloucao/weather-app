@@ -3,7 +3,7 @@ import { type AppType } from "next/app";
 import Head from "next/head";
 import icon from "../../public/weather-icon2.png"
 import { api } from "~/utils/api";
-
+import { Analytics } from "@vercel/analytics/react"
 import "~/styles/globals.css";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
@@ -14,6 +14,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         <link rel="icon" href={icon.src} />
       </Head>
       <Component {...pageProps} />
+      <Analytics />
     </div>
   );
 };

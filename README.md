@@ -17,7 +17,11 @@ A sleek and minimalistic weather application that provides real-time weather upd
 
 ## 📸 Screenshots  
 
-_🚀 TODO  
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-3.png)
+![alt text](image-2.png)
+
 
 ## 🚀 Installation & Setup  
 
@@ -43,6 +47,7 @@ _🚀 TODO
     📌 5-day weather forecast
     🌍 Multi-language support
     🎨 Dark mode toggle
+    🔄 Reopening previous search
 
 🏆 Contributing
 

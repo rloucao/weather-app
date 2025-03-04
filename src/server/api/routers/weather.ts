@@ -21,7 +21,7 @@ export const weatherRouter = createTRPCRouter({
         if (!API_KEY) {
             throw new Error("Missing API KEY");
         }
-        //"api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=80c577fab17d161a9756c2460e6a08fa"
+        //`api.openweathermap.org/data/2.5/weather?q=${place},${country}&APPID=80c577fab17d161a9756c2460e6a08fa`
 
         //https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${API_KEY}
         const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=80c577fab17d161a9756c2460e6a08fa`;
@@ -37,5 +37,30 @@ export const weatherRouter = createTRPCRouter({
             console.log("Error API:", error)
             throw new Error("Failed retrieving data")
           }
-    })
+    }),
+    getFromCity: publicProcedure.input(
+        z.object({
+            city: z.string().toLowerCase(),
+        })
+    ).query(
+        async ({input}) =>{
+            const {city } = input
+            if (!API_KEY) {
+                throw new Error("Missing API KEY");
+            }
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=80c577fab17d161a9756c2460e6a08fa`
+
+            try{
+                const res = await fetch(url)
+                if(!res.ok){
+                    throw new Error(`Failed fetching data ${res.statusText}`)
+                }
+                const data = res.json()
+                return data;
+            }catch(error){
+                console.log("Error API:", error)
+                throw new Error("Failed retrieving data")
+            }
+        }
+    )
 })

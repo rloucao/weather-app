@@ -53,8 +53,7 @@ A sleek and minimalistic weather application that provides real-time weather upd
 
 Want to improve the app? Feel free to fork the repo, make changes, and open a pull request! 🚀
 
-🌍 Visit 
-```
+🌍 See you there 🌏
 https://weather-app-seven-psi-87.vercel.app
 
 
